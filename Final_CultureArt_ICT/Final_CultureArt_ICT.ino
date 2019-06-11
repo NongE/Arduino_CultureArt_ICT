@@ -19,9 +19,10 @@ int fsrSensor1 = A1; // 2번 압력센서 A1에 연결
 int fsrSensor2 = A2; // 3번 압력센서 A2에 연결
 int fsrSensor3 = A3; // 4번 압력센서 A3에 연결
 int fsrSensor4 = A4; // 5번 압력센서 A4에 연결
-int count = 0;
+int count = 0; // 보행자가 얼마나 건넜는지 확인하는 변수
 
 // 들어온 발판을 끌때 해당 발판이 밟인 적이 있는지 확인하는 flag
+// flag로 확인하지 않으면 발판을 밟지 않음에도 (0,0,0)으로 초기화가 되어 반응 속도 저하 문제 발생
 int fsrFlag0 = 0;
 int fsrFlag1 = 0;
 int fsrFlag2 = 0;
@@ -53,7 +54,7 @@ void setup() {
   // 네오픽셀 시작 //
   strip.begin();
   strip.show();
-  strip.setBrightness(255);
+  strip.setBrightness(255); // 밝기 최대 설정
 
   // 시리얼 포트 9600번 선언 //
   Serial.begin(9600);
@@ -63,10 +64,9 @@ void setup() {
   pinMode(signalSwitch, INPUT_PULLUP);
 
   mySerial.begin (9600);
-  mp3_set_serial (mySerial);  //set softwareSerial for DFPlayer-mini mp3 module
-  //delay(1);  //wait 1ms for mp3 module to set volume
-  mp3_set_volume (30);
-  mp3_set_EQ(3);
+  mp3_set_serial (mySerial);  //가상 시리얼 포트 선언
+  mp3_set_volume (30); // 볼륨 30
+  mp3_set_EQ(3); // eq 3
 }
 
 
@@ -90,7 +90,7 @@ void loop() {
     {
       modeFlag = 0;
       // 초록불로 변경 후 만일 모드가 3~5세 모드라면 안내 멘트 출력
-      count = 0;
+      count = 0; // 보행자가 얼마나 횡단보도를 건넜는지 확인하는 변수 초기화
       Serial.println("3~5세 모드로 변경합니다.");
     }
     else
@@ -102,8 +102,6 @@ void loop() {
     }
   }
   modePrevious = modeRead;
-  // Serial.print("modeFlag is ");
-  //Serial.println(modeFlag);
 
   // 신호등 택트 스위치 상태 확인 //
   signalRead = digitalRead(signalSwitch);
@@ -129,7 +127,7 @@ void loop() {
         delay(15000);
         mp3_stop();
       }
-      //delay (4000);
+
     }
     else
     {
@@ -143,24 +141,21 @@ void loop() {
   }
   signalPrevious = signalRead;
 
-  //Serial.print("signalFag is ");
-  //Serial.println(signalFlag);
-
 
 
   int fsr0 = analogRead(fsrSensor0); // A0로 부터 아날로그 신호를 읽고 이를 fsr0에 저장
   int transFsr0 = map(fsr0, 0, 1024, 0, 255); // maapping 실시
 
-  int fsr1 = analogRead(fsrSensor1); // A0로 부터 아날로그 신호를 읽고 이를 fsr0에 저장
+  int fsr1 = analogRead(fsrSensor1); // A1로 부터 아날로그 신호를 읽고 이를 fsr1에 저장
   int transFsr1 = map(fsr1, 0, 1024, 0, 255); // maapping 실시
 
-  int fsr2 = analogRead(fsrSensor2); // A0로 부터 아날로그 신호를 읽고 이를 fsr0에 저장
+  int fsr2 = analogRead(fsrSensor2); // A2로 부터 아날로그 신호를 읽고 이를 fsr2에 저장
   int transFsr2 = map(fsr2, 0, 1024, 0, 255); // maapping 실시
 
-  int fsr3 = analogRead(fsrSensor3); // A0로 부터 아날로그 신호를 읽고 이를 fsr0에 저장
+  int fsr3 = analogRead(fsrSensor3); // A3로 부터 아날로그 신호를 읽고 이를 fsr3에 저장
   int transFsr3 = map(fsr3, 0, 1024, 0, 255); // maapping 실시
 
-  int fsr4 = analogRead(fsrSensor4); // A0로 부터 아날로그 신호를 읽고 이를 fsr0에 저장
+  int fsr4 = analogRead(fsrSensor4); // A4로 부터 아날로그 신호를 읽고 이를 fsr4에 저장
   int transFsr4 = map(fsr4, 0, 1024, 0, 255); // maapping 실시
 
   // 신호등 상태가 빨간불인 상태에 진입하게 되면 전체 red wipe 들어오기
@@ -174,7 +169,7 @@ void loop() {
 
   // 신호등 상태가 초록불이라면 정상적으로 진행
   else {
-    // transFsr4 (A0)에 압력 센서가 감지되면
+    // transFsr4 (A4)에 압력 센서가 감지되면
     if (transFsr4 > 20)
     {
       fsrFlag4 = 1;
@@ -221,7 +216,7 @@ void loop() {
     }
 
 
-    // transFsr2 (A2)에 압력 센서가 감지되면
+    // transFsr1 (A1)에 압력 센서가 감지되면
     if (transFsr1 > 20)
     {
       fsrFlag1 = 1;
@@ -244,7 +239,7 @@ void loop() {
     }
 
 
-    // transFsr4 (A4)에 압력 센서가 감지되면
+    // transFsr0 (A0)에 압력 센서가 감지되면
     if (transFsr0 > 20)
     {
       fsrFlag0 = 1;
@@ -267,7 +262,7 @@ void loop() {
     }
 
 
-    // transFsr1 (A1)에 압력 센서가 감지되면
+    // transFsr2 (A2)에 압력 센서가 감지되면
     if (transFsr2 > 20)
     {
       fsrFlag2 = 1;
@@ -291,7 +286,7 @@ void loop() {
 
   }
 
-  // Serial.println(count);
+ // 보행자가 모든 블럭을 밟았는지 확인
   if (count >= 5)
   {
     delay(1000);
