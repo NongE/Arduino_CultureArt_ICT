@@ -66,7 +66,7 @@ void setup() {
   mp3_set_serial (mySerial);  //set softwareSerial for DFPlayer-mini mp3 module
   //delay(1);  //wait 1ms for mp3 module to set volume
   mp3_set_volume (30);
-  mp3_set_EQ(5);
+  mp3_set_EQ(3);
 }
 
 
@@ -90,9 +90,6 @@ void loop() {
     {
       modeFlag = 0;
       // 초록불로 변경 후 만일 모드가 3~5세 모드라면 안내 멘트 출력
-      mp3_play (2); // 2번 멈춘다~
-      delay(15000);
-      mp3_stop();
       count = 0;
       Serial.println("3~5세 모드로 변경합니다.");
     }
@@ -126,6 +123,12 @@ void loop() {
       signalFlag = 0;
       count = 0;
       Serial.println("신호등 상태를 초록불로 변경합니다.");
+      if (modeFlag == 0)
+      {
+        mp3_play (2); // 2번 멈춘다~
+        delay(15000);
+        mp3_stop();
+      }
       //delay (4000);
     }
     else
@@ -288,7 +291,7 @@ void loop() {
 
   }
 
- // Serial.println(count);
+  // Serial.println(count);
   if (count >= 5)
   {
     delay(1000);
