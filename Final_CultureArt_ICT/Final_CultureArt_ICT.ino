@@ -43,7 +43,6 @@ int signalPrevious = LOW; // 이전 상태
 int signalRead; // 택트 스위치 디지털 신호를 읽어서 변환
 int signalFlag = 0; // 신호등 상태 1은 빨간불, 0은 초록불
 
-
 Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800); // 네오픽셀 정의
 
 void setup() {
@@ -66,7 +65,7 @@ void setup() {
   mySerial.begin (9600);
   mp3_set_serial (mySerial);  //가상 시리얼 포트 선언
   mp3_set_volume (30); // 볼륨 30
-  mp3_set_EQ(3); // eq 3
+  mp3_set_EQ(5); // eq 3
 }
 
 
@@ -88,8 +87,7 @@ void loop() {
 
     if (modeFlag == 1)
     {
-      modeFlag = 0;
-      // 초록불로 변경 후 만일 모드가 3~5세 모드라면 안내 멘트 출력
+      modeFlag = 0; // 초록불로 변경 후 만일 모드가 3~5세 모드라면 안내 멘트 출력
       count = 0; // 보행자가 얼마나 횡단보도를 건넜는지 확인하는 변수 초기화
       Serial.println("3~5세 모드로 변경합니다.");
     }
@@ -112,7 +110,6 @@ void loop() {
     else
       signalState = HIGH;
 
-
     if (signalFlag == 1)
     {
       // 초록불로 변경 시 green color wipe
@@ -124,14 +121,13 @@ void loop() {
       if (modeFlag == 0)
       {
         mp3_play (2); // 2번 멈춘다~
-        delay(15000);
         mp3_stop();
+        delay(15000);
       }
 
     }
     else
     {
-
       // 빨간불로 변경 시 red color wipe
       colorWipe(strip.Color(255,   0,   0), 0, 60);
       colorOff(strip.Color(0,   0,   0), 0, 60);
@@ -140,8 +136,6 @@ void loop() {
     }
   }
   signalPrevious = signalRead;
-
-
 
   int fsr0 = analogRead(fsrSensor0); // A0로 부터 아날로그 신호를 읽고 이를 fsr0에 저장
   int transFsr0 = map(fsr0, 0, 1024, 0, 255); // maapping 실시
@@ -159,16 +153,16 @@ void loop() {
   int transFsr4 = map(fsr4, 0, 1024, 0, 255); // maapping 실시
 
   // 신호등 상태가 빨간불인 상태에 진입하게 되면 전체 red wipe 들어오기
-  if (signalFlag == 1 && (transFsr0 > 5 || transFsr1 > 5 ||
-                          transFsr2 > 5 || transFsr3 > 5 || transFsr4 > 5))
+  if (signalFlag == 1 && (transFsr0 > 20 || transFsr1 > 20 ||
+                          transFsr2 > 20 || transFsr3 > 20 || transFsr4 > 20))
   {
     warningWipe(strip.Color(255,   0,   0), 0, 60);
     colorOff(strip.Color(0,   0,   0), 0, 60);
   }
 
-
   // 신호등 상태가 초록불이라면 정상적으로 진행
   else {
+    
     // transFsr4 (A4)에 압력 센서가 감지되면
     if (transFsr4 > 20)
     {
@@ -179,6 +173,7 @@ void loop() {
         count ++;
         mp3_play (3);
         mp3_stop();
+        delay(1000);
       }
     }
     else
@@ -194,7 +189,6 @@ void loop() {
     // transFsr3 (A3)에 압력 센서가 감지되면
     if (transFsr3 > 20)
     {
-
       fsrFlag3 = 1;
       colorWipe(strip.Color(0,   255,   0), 10, 20); // 10~20번 led On
       if (modeFlag == 0)
@@ -202,6 +196,7 @@ void loop() {
         count ++;
         mp3_play (4);
         mp3_stop();
+        delay(1000);
       }
     }
     else
@@ -226,6 +221,7 @@ void loop() {
         count ++;
         mp3_play (6);
         mp3_stop();
+        delay(1000);
       }
     }
     else
@@ -249,6 +245,7 @@ void loop() {
         count ++;
         mp3_play (7);
         mp3_stop();
+        delay(1000);
       }
     }
     else
@@ -272,6 +269,7 @@ void loop() {
         count ++;
         mp3_play (5);
         mp3_stop();
+        delay(1000);
       }
     }
     else
@@ -286,7 +284,7 @@ void loop() {
 
   }
 
- // 보행자가 모든 블럭을 밟았는지 확인
+  // 보행자가 모든 블럭을 밟았는지 확인
   if (count >= 5)
   {
     delay(1000);
@@ -295,6 +293,13 @@ void loop() {
     count = 0;
   }
 
+/*
+ * 전시를 위해 색상 루프
+      colorWipe(strip.Color(0,   255,   0), 0, 60);
+      colorOff(strip.Color(0,   0,   0), 0, 60);
+      colorWipe(strip.Color(255,   0,   0), 0, 60);
+      colorOff(strip.Color(0,   0,   0), 0, 60);
+*/
 }
 
 // LED on 관련 함수, 색 정보, 시작점과 끝점을 입력받는다.
